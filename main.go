@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"pustaka-api/entity/books"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,8 +12,9 @@ func main() {
 
 	route.GET("/", rootHandler)
 	route.GET("/hello", helloHandler)
-	route.GET("/book/:id/:title", bookHandler)
+	route.GET("/books/:id/:title", bookHandler)
 	route.GET("/query", queryHandler)
+	route.POST("/books", postBookHandle)
 
 	route.Run()
 }
@@ -43,4 +45,19 @@ func queryHandler(c *gin.Context) {
 	price := c.Query("price")
 
 	c.JSON(http.StatusOK, gin.H{"title": title, "price": price})
+}
+
+func postBookHandle(c *gin.Context) {
+	var bookInput books.BookInput
+
+	err := c.ShouldBindJSON(&bookInput)
+	if err != nil {
+		panic(err)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"title":     bookInput.Title,
+		"price":     bookInput.Price,
+		"sub_title": bookInput.SubTitle,
+	})
 }
