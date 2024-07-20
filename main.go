@@ -4,24 +4,22 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"pustaka-api/entity/books"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
 
-type BookInput struct {
-	Title string      `json:"title" binding:"required"`
-	Price json.Number `json:"price" binding:"required,number"`
-}
-
 func main() {
 	route := gin.Default()
 
-	route.GET("/", rootHandler)
-	route.GET("/hello", helloHandler)
-	route.GET("/books/:id/:title", bookHandler)
-	route.GET("/query", queryHandler)
-	route.POST("/books", postBookHandle)
+	v1 := route.Group("/v1")
+
+	v1.GET("/", rootHandler)
+	v1.GET("/hello", helloHandler)
+	v1.GET("/books/:id/:title", bookHandler)
+	v1.GET("/query", queryHandler)
+	v1.POST("/books", postBookHandle)
 
 	route.Run()
 }
@@ -55,24 +53,30 @@ func queryHandler(c *gin.Context) {
 }
 
 func postBookHandle(c *gin.Context) {
-	var bookInput BookInput
+	var bookInput books.BookInput
 
 	err := c.ShouldBindJSON(&bookInput)
 	if err != nil {
 
-		if validationError, ok := err.(validator.ValidationErrors); ok {
-			for _, e := range validationError {
-				errorMassage := fmt.Sprintf("Error on field %s, condition: %s", e.Field(), e.ActualTag())
-				c.JSON(http.StatusBadRequest, errorMassage)
-				return
+		errorMessages := []string{}
+
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			for _, e := range validationErrors {
+				errorMessage := fmt.Sprintf("Error on field %s, condition: %s", e.Field(), e.ActualTag())
+				errorMessages = append(errorMessages, errorMessage)
 			}
 		}
 
-		if UnmarshalTypeError, ok := err.(*json.UnmarshalTypeError); ok {
-			errorMassage := fmt.Sprintf("Error on field %s, condition: %s", UnmarshalTypeError.Field, UnmarshalTypeError.Value)
-			c.JSON(http.StatusBadRequest, errorMassage)
+		if unmarshalTypeError, ok := err.(*json.UnmarshalTypeError); ok {
+			errorMessage := fmt.Sprintf("Error on field %s, condition: should be %s", unmarshalTypeError.Field, unmarshalTypeError.Type)
+			errorMessages = append(errorMessages, errorMessage)
+		}
+
+		if len(errorMessages) > 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"errors": errorMessages})
 			return
 		}
+
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 
