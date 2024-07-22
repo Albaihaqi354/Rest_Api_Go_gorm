@@ -1,13 +1,9 @@
 package book
 
-import "time"
-
 type Book struct {
-	Id          int
-	Title       string
-	Description string
-	Price       int
-	Rating      int
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	Id          int    `gorm:"primaryKey"`
+	Title       string `gorm:"type:varchar(100)"`
+	Description string `gorm:"type:varchar(100)"`
+	Price       int    `gorm:"type:int"`
+	Rating      int    `gorm:"type:int"`
 }
