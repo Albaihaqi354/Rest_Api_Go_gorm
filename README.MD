@@ -16,7 +16,7 @@ These instructions will help you set up and run the Pustaka API on your local ma
 
 1. **Clone the repository:**
     ```sh
-    git clone https://github.com/your-username/pustaka-api.git
+    git clone https://github.com/Albaihaqi354/Rest_Api_Golang/
     cd pustaka-api
     ```
 
@@ -29,7 +29,7 @@ These instructions will help you set up and run the Pustaka API on your local ma
 
    Create a database named `pustaka-api` and update the connection details in the `connctDb` function in `main.go`:
     ```go
-    var dsn = "host=localhost user=postgres password=Whobay123@ dbname=pustaka-api port=5432 sslmode=disable TimeZone=Asia/Shanghai"
+    var dsn = "host=localhost user=youruser password=yourpassword dbname=pustaka-api port=5432 sslmode=disable TimeZone=Asia/Shanghai"
     ```
 
 4. **Run the application:**
