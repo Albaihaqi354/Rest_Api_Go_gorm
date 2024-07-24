@@ -2,6 +2,7 @@ package book
 
 type Service interface {
 	ViewBook() ([]Book, error)
+	ViewbookById(Id int) (Book, error)
 	InsertBook(bookRequest BookRequest) (Book, error)
 }
 
@@ -20,6 +21,15 @@ func (s *service) ViewBook() ([]Book, error) {
 	}
 
 	return books, nil
+}
+
+func (s *service) ViewbookById(Id int) (Book, error) {
+	book, err := s.repository.ViewbookById(Id)
+	if err != nil {
+		return book, err
+	}
+
+	return book, nil
 }
 
 func (s *service) InsertBook(bookRequest BookRequest) (Book, error) {

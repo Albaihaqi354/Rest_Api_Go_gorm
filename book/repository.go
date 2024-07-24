@@ -6,6 +6,7 @@ import (
 
 type Repository interface {
 	ViewBook() ([]Book, error)
+	ViewbookById(Id int) (Book, error)
 	InsertBook(book Book) (Book, error)
 }
 
@@ -24,6 +25,15 @@ func (r *repository) ViewBook() ([]Book, error) {
 		return books, err
 	}
 	return books, nil
+}
+
+func (r *repository) ViewbookById(Id int) (Book, error) {
+	var book Book
+	err := r.db.Find(&book, Id).Error
+	if err != nil {
+		return book, err
+	}
+	return book, nil
 }
 
 func (r *repository) InsertBook(book Book) (Book, error) {

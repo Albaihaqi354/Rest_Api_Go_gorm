@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"pustaka-api/book"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator"
@@ -18,35 +19,49 @@ func NewBookHandler(bookService book.Service) *bookHandeler {
 	return &bookHandeler{bookService}
 }
 
-func (h *bookHandeler) RootHandler(c *gin.Context) {
+func (h *bookHandeler) GetBooks(c *gin.Context) {
+	books, err := h.bookService.ViewBook()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
+		return
+	}
+
+	var booksResponse []book.BookResponse
+
+	for _, response := range books {
+		bookResponse := convertToBookResponse(response)
+
+		booksResponse = append(booksResponse, bookResponse)
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"Name": "Bian Albaihaqi",
-		"Bio":  "Back-end Development",
+		"data": books,
 	})
 }
 
-func (h *bookHandeler) HelloHandler(c *gin.Context) {
+func (h *bookHandeler) GetBook(c *gin.Context) {
+	idString := c.Param("id")
+	id, _ := strconv.Atoi(idString)
+
+	response, err := h.bookService.ViewbookById(int(id))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"errors": err,
+		})
+		return
+	}
+
+	bookResponse := convertToBookResponse(response)
+
 	c.JSON(http.StatusOK, gin.H{
-		"Kota":   "Garut",
-		"Negara": "Indonesia",
+		"data": bookResponse,
 	})
 }
 
-func (h *bookHandeler) BookHandler(c *gin.Context) {
-	id := c.Param("id")
-	title := c.Param("title")
-
-	c.JSON(http.StatusOK, gin.H{"id": id, "title": title})
-}
-
-func (h *bookHandeler) QueryHandler(c *gin.Context) {
-	title := c.Query("title")
-	price := c.Query("price")
-
-	c.JSON(http.StatusOK, gin.H{"title": title, "price": price})
-}
-
-func (h *bookHandeler) PostBookHandler(c *gin.Context) {
+func (h *bookHandeler) CreateBook(c *gin.Context) {
 	var bookRequest book.BookRequest
 
 	err := c.ShouldBindJSON(&bookRequest)
@@ -87,4 +102,14 @@ func (h *bookHandeler) PostBookHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"data": book,
 	})
+}
+
+func convertToBookResponse(response book.Book) book.BookResponse {
+	return book.BookResponse{
+		Id:          response.Id,
+		Title:       response.Title,
+		Price:       response.Price,
+		Description: response.Description,
+		Rating:      response.Rating,
+	}
 }

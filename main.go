@@ -25,11 +25,9 @@ func main() {
 
 	route := gin.Default()
 	v1 := route.Group("/v1")
-	v1.GET("/", bookHandler.RootHandler)
-	v1.GET("/hello", bookHandler.HelloHandler)
-	v1.GET("/books/:id/:title", bookHandler.BookHandler)
-	v1.GET("/query", bookHandler.QueryHandler)
-	v1.POST("/books", bookHandler.PostBookHandler)
+	v1.GET("/books", bookHandler.GetBooks)
+	v1.GET("/books/:id", bookHandler.GetBook)
+	v1.POST("/books", bookHandler.CreateBook)
 
 	route.Run()
 }
