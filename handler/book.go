@@ -100,7 +100,56 @@ func (h *bookHandeler) CreateBook(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": book,
+		"data": convertToBookResponse(book),
+	})
+}
+
+func (h *bookHandeler) UpdateBook(c *gin.Context) {
+	idString := c.Param("id")
+	id, _ := strconv.Atoi(idString)
+
+	var bookRequest book.BookRequest
+
+	err := c.ShouldBindJSON(&bookRequest)
+	if err != nil {
+		errorMessages := []string{}
+		for _, e := range err.(validator.ValidationErrors) {
+			errorMessage := fmt.Sprintf("Error on field %s, condition: %s", e.Field(), e.ActualTag())
+			errorMessages = append(errorMessages, errorMessage)
+		}
+
+		c.JSON(http.StatusBadRequest, gin.H{
+			"errors": errorMessages,
+		})
+	}
+
+	book, err := h.bookService.UpdateBook(int(id), bookRequest)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": convertToBookResponse(book),
+	})
+}
+
+func (h *bookHandeler) DeleteBook(c *gin.Context) {
+	idString := c.Param("id")
+	id, _ := strconv.Atoi(idString)
+
+	book, err := h.bookService.DeleteBook(int(id))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"Delete": convertToBookResponse(book),
 	})
 }
 
